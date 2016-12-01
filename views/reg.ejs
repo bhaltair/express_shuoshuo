@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册 - 班级说说</title>
+    <link rel="stylesheet" href="/public/css/bootstrap.css">
+    <script src="/public/js/jquery-1.12.3.min.js"></script>
+    <style type="text/css">
+        h1{
+            margin-bottom:50px;
+        }
+        .alert{
+            margin:0;
+            margin-top:10px;
+            padding:6px 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">班级说说</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="/">说说列表</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/login">登录</a></li>
+                <li class="active"><a href="/reg">注册</a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6">
+            <h1>注册 - 班级说说</h1>
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">邮箱地址</label>
+                    <div class="col-sm-10">
+                        <input type="email" class="form-control" id="inputEmail" placeholder="请输入邮箱地址，今后登录的时候就要使用这个邮箱地址">
+                        <div id="emailAlert" class="alert alert-success" role="alert">...</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputPassword3" class="col-sm-2 control-label">密码</label>
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" id="inputPassword1" placeholder="至少6位，必须含有字母和数字">
+                        <div id="password1Alert" class="alert alert-success" role="alert">...</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputPassword3" class="col-sm-2 control-label">重复密码</label>
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" id="inputPassword2" placeholder="请再次输入密码">
+                        <div id="password2Alert" class="alert alert-success" role="alert">...</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button id="btn" type="button" class="btn btn-success">注册</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    //标记，邮箱名、密码、重复密码是否通过了正则
+    var emailCheck = false;
+    var passwordCheck = false;
+    var password2Check = false;
+
+    //正则表达式
+    $("#inputEmail").blur(function(){
+        //邮箱的正则
+        var email = $(this).val();
+        if(!/^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$/.test(email)){
+            //正则没有通过
+            $("#emailAlert").fadeIn().attr("class","alert alert-danger").html("邮箱格式不正确");
+        }else{
+            //通过正则验证之后，还要验证邮箱是否已经被占用
+            $.get("/checkexist?email=" + email , function(data){
+                if(data == "true"){
+                    $("#emailAlert").fadeIn().attr("class","alert alert-danger").html("邮箱已经被占用！");
+                }else{
+                    $("#emailAlert").fadeIn().attr("class","alert alert-success").html("恭喜，邮箱地址可以使用");
+                }
+            });
+            emailCheck = true;
+        }
+    });
+
+    $("#inputPassword1").blur(function(){
+        var password = $(this).val();
+        //密码长度的检查
+        if(password.length < 6){
+            $("#password1Alert").fadeIn().attr("class","alert alert-danger").html("密码最少6位");
+            return;
+        }
+        if(!/[A-Za-z]/.test(password)){
+            $("#password1Alert").fadeIn().attr("class","alert alert-danger").html("密码必须含有字母");
+            return;
+        }
+        if(!/[\d]/.test(password)){
+            $("#password1Alert").fadeIn().attr("class","alert alert-danger").html("密码必须含有数字");
+            return;
+        }
+         passwordCheck = true;
+    });
+
+    $("#inputPassword2").blur(function(){
+        var password1 = $("#inputPassword1").val();
+        var password2 = $(this).val();
+
+        if(password1 !== password2){
+            $("#password2Alert").fadeIn().attr("class","alert alert-danger").html("两次输入的密码不匹配");
+        }else{
+            $("#password2Alert").fadeIn().attr("class","alert alert-success").html("密码设置正确");
+            password2Check = true;
+        }
+    });
+
+    //输入的时候要隐藏提示
+    $("#inputEmail").focus(function(){
+        $("#emailAlert").fadeOut();
+    })
+
+    $("#inputPassword1").focus(function(){
+        $("#password1Alert").fadeOut();
+    });
+
+    $("#inputPassword2").focus(function(){
+        $("#password2Alert").fadeOut();
+    });
+
+
+    //注册按钮
+    $("#btn").click(function(){
+        if(!(emailCheck && passwordCheck && password2Check)){
+            alert("请按规定修改！然后提交！");
+            return;
+        }
+
+        //提交业务
+        $.post("/reg",{
+            "email" : $("#inputEmail").val(),
+            "password" : $("#inputPassword1").val()
+        },function(data){
+            if(data == "-1"){
+                alert("服务器错误");
+            }else if(data == "-2"){
+                alert("邮箱被占用");
+            }else if(data == "1"){
+                alert("注册成功！现在将自动跳转到登录页面，请登录！");
+                window.location = "/login";
+            }
+        })
+    });
+</script>
+</body>
+</html>

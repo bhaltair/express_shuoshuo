@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>头像裁剪 - 班级说说</title>
+    <link rel="stylesheet" href="/public/css/bootstrap.css">
+    <link rel="stylesheet" href="/public/css/jqueryui.css">
+    <script src="/public/js/jquery-1.12.3.min.js"></script>
+    <style type="text/css">
+        h1{
+            margin-bottom:50px;
+        }
+        .alert{
+            margin:0;
+            margin-top:10px;
+            padding:6px 10px;
+            display: none;
+        }
+        .picture{
+            position: relative;
+            border:1px solid black;
+            float: left;
+        }
+        .mask{
+            position: absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background-color: black;
+            opacity:0.8;
+            z-index:2;
+        }
+        .cutbox{
+            width:100px;
+            height:100px;
+            position: absolute;
+            top:0;
+            left:0;
+            z-index:3;
+            overflow: hidden;
+        }
+        .cutbox #slt{
+            position: absolute;
+            top:0;
+            left:0;
+        }
+        .t{
+            position: absolute;
+            top:0;
+            left:0;
+            width:200%;
+            height:0px;
+            border-top:2px dashed yellow;
+            animation:move-left 3s linear 0s infinite;
+        }
+        .l{
+            position: absolute;
+            top:-100%;
+            left:0;
+            height:200%;
+            width:0px;
+            border-left:2px dashed yellow;
+            animation:move-down 3s linear 0s infinite;
+        }
+        .b{
+            position: absolute;
+            bottom:0;
+            left:-100%;
+            height:0;
+            width:200%;
+            border-bottom:2px dashed yellow;
+            animation:move-right 3s linear 0s infinite;
+        }
+        .r{
+            position: absolute;
+            right:0;
+            top:0;
+            height:200%;
+            width:0;
+            border-right:2px dashed yellow;
+            animation:move-up 3s linear 0s infinite;
+        }
+        @-webkit-keyframes move-left {
+            from{
+                left:0;
+            }
+            to{
+                left:-100%;
+            }
+        }
+        @-webkit-keyframes move-right {
+            from{
+                left:-100%;
+            }
+            to{
+                left:0%;
+            }
+        }
+        @-webkit-keyframes move-down {
+            from{
+                top:-100%;
+            }
+            to{
+                top:0%;
+            }
+        }
+        @-webkit-keyframes move-up {
+            from{
+                top:0%;
+            }
+            to{
+                top:-100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">班级说说</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="/">说说列表</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a>欢迎，亲爱的<%=email%></a></li>
+                <li class="active"><a href="/profile">个人资料</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6">
+            <h1>头像裁剪</h1>
+
+            <div class="picture">
+                <img src="/uploads/<%=avatarurl%>.jpg" alt="">
+                <div class="mask"></div>
+                <div class="cutbox" id="cutbox">
+                    <img id="slt" src="/uploads/<%=avatarurl%>.jpg" alt=""/>
+                    <div class="t"></div>
+                    <div class="l"></div>
+                    <div class="b"></div>
+                    <div class="r"></div>
+                </div>
+            </div>
+
+            <input type="button" value="裁剪！" id="btn">
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/public/js/jquery-ui.min.js"></script>
+<script type="text/javascript">
+    //可拖拽
+    $("#cutbox").draggable({
+        "containment" : "parent",
+        "drag" : function(event,ui){
+            var left = ui.position.left;
+            var top = ui.position.top;
+            $("#slt").css({
+                "left" : -left,
+                "top" : -top
+            })
+        }
+    });
+
+    //可变形
+    $("#cutbox").resizable({
+        //父盒子
+        containment: "parent",
+        //约束比例是1:1
+        aspectRatio: 1 / 1
+    });
+
+    $("#btn").click(function(){
+        $.get("/cut",{
+            "x" : parseInt($("#cutbox").css("left")),
+            "y" : parseInt($("#cutbox").css("top")),
+            "w" : parseInt($("#cutbox").css("width")),
+            "h" : parseInt($("#cutbox").css("height")),
+            "file" : "<%=avatarurl%>"
+        },function(data){
+            if(data == 1){
+                alert("头像裁剪成功！");
+                window.location = "/profile";
+            }else{
+                alert("头像裁剪失败，请联系管理员！");
+            }
+        });
+    })
+</script>
+</body>
+</html>

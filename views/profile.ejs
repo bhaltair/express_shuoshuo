@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>个人资料 - 班级说说</title>
+    <link rel="stylesheet" href="/public/css/bootstrap.css">
+    <script src="/public/js/jquery-1.12.3.min.js"></script>
+    <style type="text/css">
+        h1{
+            margin-bottom:50px;
+        }
+        .alert{
+            margin:0;
+            margin-top:10px;
+            padding:6px 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">班级说说</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="/">说说列表</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a><img src="<%=avatar%>" style="width:20px;margin-right: 6px;">欢迎，亲爱的<%=email%></a></li>
+                <li class="active"><a href="/profile">个人资料</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6">
+            <h1>个人资料</h1>
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">头像</label>
+                    <div class="col-sm-10">
+                        <img src="<%=avatar%>" style="border:1px solid #e0e0e0" />
+                        <a href="/changeavatar">更改头像</a>
+                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">昵称</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputNicheng" value="<%=nickname%>" placeholder="请输入昵称">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">签名</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputJianjie" value="<%=signature%>" placeholder="请输入一句话简介">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-10 col-lg-offset-2">
+                        <input type="button" class="btn btn-success" id="btn" value="提交">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("#btn").click(function(){
+        $.post("/changeprofile",{
+            "nickname" : $("#inputNicheng").val(),
+            "signature" : $("#inputJianjie").val()
+        },function(data){
+            if(data == "1"){
+                alert("资料修改成功");
+            }else{
+                alert("请联系管理员！错误！");
+            }
+        })
+    });
+</script>
+</body>
+</html>

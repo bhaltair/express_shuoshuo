@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>说说详情 - 班级说说</title>
+    <link rel="stylesheet" href="/public/css/bootstrap.css">
+    <script src="/public/js/jquery-1.12.3.min.js"></script>
+    <style type="text/css">
+        h1{
+            margin-bottom:50px;
+        }
+        .alert{
+            margin:0;
+            margin-top:10px;
+            padding:6px 10px;
+            display: none;
+        }
+        .grid{
+            border:1px solid #eee;
+            height:200px;
+            padding:20px;
+            box-shadow: 1px 1px 1px black;
+            margin-bottom:10px;
+        }
+        
+        .media-body {
+            width:100%;
+            display: block;
+            border-bottom: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">班级说说</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="/">说说列表</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <% if(login){%>
+                    <li><a><img src="<%=avatar%>" style="width:20px;margin-right: 6px;">欢迎，亲爱的<%=email%></a></li>
+                    <li><a href="/profile">个人资料</a></li>
+                    <li><a href="/logout">退出登录</a></li>
+                <%}else{%>
+                    <li><a href="/login">登录</a></li>
+                    <li><a href="/reg">注册</a></li>
+                <%}%>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+
+<div class="container">
+    <div class="row" id="neirongbox">
+        <h3>
+            <% if(fatienagerendenickname){%>
+                <%=fatienagerendenickname%>
+            <%}else{%>
+                <%=email%>
+            <%}%>
+            于
+            <%=date%>
+            说：
+        </h3>
+        <p>
+            <%=content%>
+        </p>
+    </div>
+
+    <div class="comment" style='margin-top:40px'>
+
+    </div>
+
+    <div class="row">
+        <h3>评论</h3>
+        <div class="col-lg-9">
+            <input type="text" class="form-control" id="neirong" placeholder="请输入你想说的话" />
+        </div>
+        <div class="col-lg-3">
+            <input type="button" class="btn btn-success" value="评论" id="pinglun"/>
+        </div>
+    </div>
+</div>
+
+<script type="text/template" id="temp1">
+    <div class="media">
+        <div class="media-body">
+            <h4 class="media-heading">{{email}}</h4>
+            <p>{{content}}</p>
+            <p class="text-primary">{{date}}</p>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript" src="/public/js/underscore.js"></script>
+<script type="text/javascript">
+    $("#pinglun").click(function(){
+        $.post("/comments",{
+            "email" : "<%=email%>",
+            "content" : $("#neirong").val(),
+            "postID" : '<%=postID%>'
+        },function(data){
+            if(data == 1){
+                commentUpdate();
+                $("#neirong").val(''); //清空登陆框
+            }
+        });
+    });
+
+    //通过ajax组件dom
+    var templateStr = $("#temp1").html();
+    var compile = _.template(templateStr);
+    function commentUpdate(){
+        $(".comment").empty();
+        $.get('/getAllcomments/<%=postID%>',function(data){
+            //console.log(data);
+            _.each(data,function(dic){
+                //模板修正
+                dic.date = new Date(dic.date).toLocaleString();
+                var dom = compile(dic);
+                $(dom).appendTo(".comment");
+            })
+        })
+    }
+
+    // 第一次发出ajax请求
+    commentUpdate();
+
+
+
+</script>
+</body>
+</html>

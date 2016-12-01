@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页 - 班级说说</title>
+    <link rel="stylesheet" href="/public/css/bootstrap.css">
+    <script src="/public/js/jquery-1.12.3.min.js"></script>
+    <style type="text/css">
+        h1{
+            margin-bottom:50px;
+        }
+        .alert{
+            margin:0;
+            margin-top:10px;
+            padding:6px 10px;
+            display: none;
+        }
+        .grid{
+            border:1px solid #eee;
+            height:200px;
+            padding:20px;
+            box-shadow: 1px 1px 1px black;
+            margin-bottom:10px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">班级说说</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/">说说列表</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a><img src="<%=avatar%>" style="width:20px;margin-right: 6px;">欢迎，亲爱的<%=email%></a></li>
+                <li><a href="/profile">个人资料</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="jumbotron">
+            <div class="col-lg-2">
+                <img src="<%=avatar%>" width="40">
+                <b><%=nickname%></b>
+            </div>
+            <div class="col-lg-9">
+                <input type="text" class="form-control" id="neirong" placeholder="请输入你想说的话" />
+            </div>
+            <div class="col-lg-1">
+                <input type="button" class="btn btn-success" value="发言" id="btn"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--内容展示-->
+<div class="container">
+    <div class="row" id="neirongbox">
+
+    </div>
+</div>
+
+<script type="text/template" id="template">
+    <div class="col-lg-3">
+        <div class="grid">
+            <p>
+                <img src="{{avatar}}" width="40" style="border-radius:50%;"><b>{{nickname}}</b>说：
+            </p>
+            <p>
+                {{content}}
+            </p>
+            <p>
+                <a href="/shuoshuo/{{id}}" target="_blank">评论</a><span class="comNum">{{comNum}}</span> <a href="/zan/{{id}}">点赞</a><span class="zanNum">0
+            </p>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript" src="/public/js/underscore.js"></script>
+<script type="text/javascript">
+    $("#btn").click(function(){
+        $.post("/fayan",{
+            "email" : "<%=email%>",
+            "content" : $("#neirong").val()
+        },function(data){
+//            alert(data);
+            if(data == 1){
+                update();
+                //重置登陆框
+                $("#neirong").val('');
+            }
+        });
+    });
+
+
+    var templateStr = $("#template").html();
+    var compile = _.template(templateStr);
+    function update(){
+        $("#neirongbox").empty();
+        //Ajax请求JSON
+        $.get("/getAllShuoshuo",function(data){
+            var data = _.sortBy(data,"date");
+
+            for(var i = data.length - 1; i>= 0 ; i--){
+                dic = data[i];
+                //模板修正
+                if(!dic.nickname){
+                    dic.nickname = "无名用户(" + dic.email + ")";
+                }
+                if(!dic.avatar){
+                    dic.avatar = "/public/images/avatar.png";
+                }else{
+
+                    dic.avatar = "/uploads/" + dic.avatar + ".jpg";
+                }
+                var dom = compile(dic);
+                $(dom).appendTo("#neirongbox");
+            }
+        })
+    }
+
+
+    update();
+
+</script>
+</body>
+</html>
